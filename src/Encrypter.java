@@ -25,35 +25,9 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 
 
+public class Encrypter {
 
 
-public class Encoder {
-
-	// Configuration
-	private final static String KS_ALG = "JCEKS";
-	private final static String KS_PROVIDER = "SunJCE";
-	private final static String KS_ENC_ALIAS = "encryptKeys";
-	private final static String KS_DEC_ALIAS = "decryptKeys";
-	
-	private final static String KG_ALG = "AES";
-	private final static String KG_PROVIDER = "SunJCE";
-
-	private final static String IV_ALG = "SHA1PRNG";
-	private final static byte IV_SIZE = 16;
-	private final static String IV_PROVIDER  = "SUN";
-	private final static String SIGN_ALG = "SHA1withRSA";
-	private final static String SIGN_PROVIDER  ="SunRsaSign";
-	
-	private final static String CIPHER_ALG = "AES/CBC/PKCS5Padding";
-	private final static String CIPHER_PROVIDER  ="SunJCE";
-	
-	private final static String CIPHER_KEY_ALG = "RSA";
-	private final static String CIPHER_KEY_PROVIDER  ="SunJCE";
-	
-	private final static String ENCRYPTED_FILE_EXT  = ".enc";
-	private final static String CONFIG_FILE_EXT  = ".conf";
-	
-	private final static int BLOCK_SIZE  = 1024;
 	
 	// Variables
 	private static String _fPath;
@@ -77,8 +51,10 @@ public class Encoder {
 	// IV Variables
 	private static IvParameterSpec _ivPS = null;
 	
+	
 	public static void main(String[] args) throws Exception {
-
+		
+		
 
 		//TODO: assert if no arguments (READ ARGS)
 		_fPath = args[0];
@@ -87,17 +63,11 @@ public class Encoder {
 		_keyPass = args[3];
 		_storePass = args[4];
 		_keyPassDec = args[5];
-		_ks = GetKeyStore( _ksPath, _keyPass);
-		_ksDec = GetKeyStore( _ksPathDec, _keyPassDec);
+
 		
-		_sk = GenerateSecretKey();
-		if (_sk == null) return;
+
 		
-		_ivPS = GenerateIV();
-		if (_ivPS == null) return;
-		
-		_sign = GenerateSignature();
-		if (_sign == null) return;
+		if (!GenerateEncryptionData()) return;
 		
 		if (!SetCipher()) return;
 		
@@ -105,7 +75,7 @@ public class Encoder {
 		
 		if (!SetEncryptedKey()) return;
 		
-		if (!GenerateConfigFile()) return;
+		if (!Config.GenerateConfigFile(_fPath, _skCiphered, _sResult, _ivPS)) return;
 		
 
 		
@@ -114,50 +84,36 @@ public class Encoder {
 	}
 	
 	
-	private static boolean GenerateConfigFile() throws Exception {
-		BufferedWriter out = null;
-		String fName = GetFilePathWithoutExtension(_fPath) + CONFIG_FILE_EXT;
-		try{
-			
-			out = new BufferedWriter(new FileWriter(fName));
-			
-		    out.write(Arrays.toString(_skCiphered) + "\r\n");
-            out.write(_skCiphered.length +"\r\n");
-            out.write(Arrays.toString(_sResult) + "\r\n");
-            out.write(_sResult.length + "\r\n");
-            out.write(Arrays.toString(_ivPS.getIV())+"\r\n");
-            out.write(IV_SIZE+"\r\n");
-            out.write(KS_ALG+"\r\n");
-            out.write(KS_PROVIDER +"\r\n");
-            out.write(CIPHER_ALG  + "\r\n");
-            out.write(KG_ALG + "\r\n");
-            out.write(KG_PROVIDER  + "\r\n");
-            out.write(CIPHER_KEY_ALG +"\r\n");
-            out.write(CIPHER_KEY_PROVIDER  +"\r\n");
-            out.write(SIGN_ALG +"\r\n");
-            out.write(SIGN_PROVIDER  +"\r\n");
-            out.write(KS_ENC_ALIAS +"\r\n");
-            out.write(KS_DEC_ALIAS +"\r\n");
-			
-			
-		} catch (Exception e){
+	private static boolean GenerateEncryptionData(){
+		
+		try {
+			_ks = GetKeyStore( _ksPath, _keyPass);
+			_ksDec = GetKeyStore( _ksPathDec, _keyPassDec);
+		} catch (IOException e) {
+			e.printStackTrace();
 			return false;
-			
-		} finally {
-			if (out != null){
-				out.close();
-			}
 		}
+		
+		
+		_sk = GenerateSecretKey();
+		if (_sk == null) return false;
+		
+		_ivPS = GenerateIV();
+		if (_ivPS == null) return false;
+		
+		_sign = GenerateSignature();
+		if (_sign == null) return false;
 		
 		return true;
 		
 	}
 
 
+
 	private static boolean SetEncryptedKey() {
 		try {
-			_cipherKey = Cipher.getInstance(CIPHER_KEY_ALG, CIPHER_KEY_PROVIDER);
-			_cipherKey.init(Cipher.ENCRYPT_MODE, _ksDec.getCertificate(KS_DEC_ALIAS));
+			_cipherKey = Cipher.getInstance(Config.CIPHER_KEY_ALG, Config.CIPHER_KEY_PROVIDER);
+			_cipherKey.init(Cipher.ENCRYPT_MODE, _ksDec.getCertificate(Config.KS_DEC_ALIAS));
 			_cipherKey.update(_sk.getEncoded());
 			
 			_skCiphered = _cipherKey.doFinal();
@@ -170,19 +126,15 @@ public class Encoder {
 		
 	}
 	
-	private static String GetFilePathWithoutExtension(String path){
-		path = path.substring(0, path.lastIndexOf('.'));
-		return path;
-	}
 
 
 	private static boolean EncryptDataToFile() throws Exception {
 		FileInputStream fi = null;
 		FileOutputStream fo = null;
-		String encPath = GetFilePathWithoutExtension(_fPath) + ENCRYPTED_FILE_EXT;
+		String encPath = Utilites.GetFilePathWithoutExtension(_fPath) + Config.ENCRYPTED_FILE_EXT;
 		
 		int i;
-		byte[] block = new byte[BLOCK_SIZE];
+		byte[] block = new byte[Config.BLOCK_SIZE];
 		
 		try {
 			fi = new FileInputStream(new File(_fPath));
@@ -225,7 +177,7 @@ public class Encoder {
 		
 
 		try {
-			_cipher = Cipher.getInstance(CIPHER_ALG, CIPHER_PROVIDER);
+			_cipher = Cipher.getInstance(Config.CIPHER_ALG, Config.CIPHER_PROVIDER);
 			_cipher.init(Cipher.ENCRYPT_MODE, _sk, _ivPS);
 			return true;
 			
@@ -243,9 +195,9 @@ public class Encoder {
 
 	private static Signature GenerateSignature() {
 		try {
-			Signature sign = Signature.getInstance(SIGN_ALG, SIGN_PROVIDER);
+			Signature sign = Signature.getInstance(Config.SIGN_ALG, Config.SIGN_PROVIDER);
 			
-			Key priv = _ks.getKey(KS_ENC_ALIAS, _storePass.toCharArray());
+			Key priv = _ks.getKey(Config.KS_ENC_ALIAS, _storePass.toCharArray());
 			
 			sign.initSign((PrivateKey) priv);
 					
@@ -259,10 +211,10 @@ public class Encoder {
 	}
 
 	private static IvParameterSpec GenerateIV() {
-		byte[] iv = new byte[IV_SIZE];
+		byte[] iv = new byte[Config.IV_SIZE];
 		SecureRandom secRand = null;
 		try {
-			secRand = SecureRandom.getInstance(IV_ALG, IV_PROVIDER);
+			secRand = SecureRandom.getInstance(Config.IV_ALG, Config.IV_PROVIDER);
 			secRand.nextBytes(iv);
 			
 			return new IvParameterSpec(iv);
@@ -277,7 +229,7 @@ public class Encoder {
 		KeyGenerator kg = null;
 		
 		try {
-			kg = KeyGenerator.getInstance(KG_ALG, KG_PROVIDER);
+			kg = KeyGenerator.getInstance(Config.KG_ALG, Config.KG_PROVIDER);
 			return kg.generateKey();
 			
 		} catch (Exception e) {
@@ -292,7 +244,7 @@ public class Encoder {
 		
 		//	Loading key store from path
 		try {
-			ks = KeyStore.getInstance(KS_ALG, KS_PROVIDER);
+			ks = KeyStore.getInstance(Config.KS_ALG, Config.KS_PROVIDER);
 			ksInputStream = new FileInputStream(path);
 			ks.load(ksInputStream, pass.toCharArray());
 			

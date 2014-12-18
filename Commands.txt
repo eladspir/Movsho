@@ -1,0 +1,4 @@
+keytool -genkeypair -alias encryptKeys -keyalg RSA -keypass encPass1 -keystore C:\Keys\EncryptKeyStore.jks -storepass encPass2 -dname "cn=Limor Frost, ou=TAU, o=TAU-CS, c=IS"
+
+
+keytool -genkeypair -alias decryptKeys -keyalg RSA -keypass decPass1 -keystore C:\Keys\DecryptKeyStore.jks -storepass decPass2 -dname "cn=Elad Spira, ou=TAU, o=TAU-CS, c=IS"
