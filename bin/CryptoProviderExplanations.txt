@@ -1,0 +1,11 @@
+
+The following provider were used :
+
+1) SunJCE contains valuable features such as "AES", "JCEKS", "RSA".
+The first is used for encrypting the raw data in blocks. 
+The second is for handling the KeyStore.
+The third is used for asymmetric encrypting of the secret key. 
+
+2) SUN contains SHA1PRNG for generating the pseudo-random Initialization Vector. 
+
+3) SunRsaSign contains SHA1withRSA algorithm that was needed encrypt and hash the signature.

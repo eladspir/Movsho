@@ -53,8 +53,7 @@ public class Encrypter {
 	
 	
 	public static void main(String[] args) throws Exception {
-		
-		
+			
 
 		//TODO: assert if no arguments (READ ARGS)
 		_fPath = args[0];
@@ -63,9 +62,6 @@ public class Encrypter {
 		_keyPass = args[3];
 		_storePass = args[4];
 		_keyPassDec = args[5];
-
-		
-
 		
 		if (!GenerateEncryptionData()) return;
 		
