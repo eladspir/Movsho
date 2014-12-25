@@ -1,5 +1,5 @@
 
-The following provider were used :
+The following providers were used :
 
 1) SunJCE contains valuable features such as "AES", "JCEKS", "RSA".
 The first is used for encrypting the raw data in blocks. 
