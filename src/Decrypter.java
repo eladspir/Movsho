@@ -58,7 +58,7 @@ public class Decrypter {
 	public static void main(String[] args) throws Exception {
 		
 		// Read and Validate Arguments
-		if (!ReadUserInput(args, 7)){
+		if (!ReadUserInput(args, 8)){
 			PrintError();
 			return;
 		}
@@ -104,10 +104,11 @@ public class Decrypter {
 	// 						Encryption and Decryption KeyStores...
 	// 						Encryption private key...
 	// 						Decryption private and public key
+	//						Decryption file path
 	private static boolean ReadUserInput(String[] args, int num) {
 
 		if (args.length != num) {
-			System.out.println(Msg.ERROR_NOT_ENOUGH_ARG);
+			System.out.println(Msg.ERROR_SUFFINCENT_ARG);
 			return false;
 		}
 
@@ -118,7 +119,7 @@ public class Decrypter {
 		_keyPass = args[4];
 		_storePass = args[5];
 		_keyPassEnc = args[6];
-		_DecPath = Utilites.GetFilePathWithoutExtension(_fPath) + ".dec";
+		_DecPath = args[7];
 
 		if (!Utilites.ExistFileMulti(new String[] { _fPath, _confPath, _ksPath, _ksEncPath })) {
 			System.out.println(Msg.ERROR_INVALID_FILES_MSG);

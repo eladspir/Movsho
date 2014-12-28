@@ -4,6 +4,8 @@ public class Msg {
 			"Error: Not all input files are valid.";
 	public final static String ERROR_NOT_ENOUGH_ARG = 
 			"Error: Not Enought arguments were given.";
+	public final static String ERROR_SUFFINCENT_ARG = 
+			"Error: Not suffiecnt amount of arguments were given.";
 	public final static  String SIGNATURE_MISMATCH_MSG = 
 			"Error: Signatures mismatach. The proccess in not allowed.";
 	

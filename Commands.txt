@@ -2,3 +2,8 @@ keytool -genkeypair -alias encryptKeys -keyalg RSA -keypass encPass1 -keystore C
 
 
 keytool -genkeypair -alias decryptKeys -keyalg RSA -keypass decPass1 -keystore C:\Keys\DecryptKeyStore.jks -storepass decPass2 -dname "cn=Elad Spira, ou=TAU, o=TAU-CS, c=IS" -validity 360
+
+
+java -jar encrypt.jar plaintext.txt EncryptKeyStore.jks DecryptKeyStore.jks encPass2 encPass1 decPass2
+
+java -jar decrypt.jar plaintext.enc plaintext.conf decryptKeyStore.jks EncryptKeyStore.jks decPass2 decPass1 encPass2 decrypted.txt
